@@ -1,0 +1,64 @@
+#!/bin/bash
+# Author: Damian Fajfer <d.fajfer@skaza.org>
+# License: GPLv3
+# Description: Modifies generate-pxe-menu config
+
+# TODO: check_if_root
+
+USAGE(){
+echo "I edit the config for you!"
+echo "How to use?: $(basename $0) [FLAG]"
+echo "Flags:"
+echo "-b --background IMAGE: swap given image with the current DRBL image"
+echo "-i --image: switch an image"
+echo "-r --restore: switch default boot from Windows to Disk Restore"
+echo "-u --update: add new image as Disk Restore"
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+	-b|--background)
+	    shift #TODO
+	    if [ -z "$(echo $1 | grep ^-.)" ]; then
+		newFile=$1
+		oldFile=$(cat $PXECFG_DIR/default | grep 'MENU\ BACKGROUND' | awk '{print $3}')
+
+		echo "$oldFile is gonna be substituted with $newFile"
+		echo -n "Are you sure? [y/N]"
+		read option
+		if [ option -eq [y|Y] ] #TODO
+		   then
+	  	       cp $PXECFG_DIR/$oldFile $PXECFG_DIR/$oldFile.bac
+		       cp $newFile $PXECFG_DIR
+		       sed -i s/$oldFile/$newFile/ $PXECFG_DIR/default
+	        
+		       echo "$oldFile has been successfuly substituted with $newFile"
+		       echo "$oldFile backup is now in $PXECFG_DIR/$oldFile.bac"
+		       exit 0
+		   else
+			 echo "$oldFile has been left alone."
+			 exit 0
+		   fi
+		fi
+		;;
+	-i|--image)
+	    shift
+	    ;;
+	-r|--restore)
+	    shift
+	    ;;
+	-u|--update)
+	    shift
+	    ;;
+	-v|--verbose)
+	    shift
+	    ;;
+#	-*|*)
+#	    echo "${0}: ${1}: incorrect usage" >&2
+#	    USAGE >&2
+#	    exit 1
+#	    ;;
+    esac
+
+done
+exit 0
